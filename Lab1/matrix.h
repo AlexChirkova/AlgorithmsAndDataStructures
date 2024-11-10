@@ -85,7 +85,7 @@ public:
 
 	Matrix operator+(const Matrix& other) {
 		if (_rows != other._rows || _cols != other._cols) throw invalid_argument("Sizes of matrixes must match.");
-		Matrix res_m(_rows, _cols, 0);
+		Matrix res_m(_rows, _cols);
 		for (int i = 0; i < _rows; ++i) {
 			for (int j = 0; j < _cols; ++j) {
 				res_m(i,j) = _matrix[i][j] + other._matrix[i][j];
@@ -96,7 +96,7 @@ public:
 
 	Matrix operator-(const Matrix& other) {
 		if (_rows != other._rows || _cols != other._cols) throw invalid_argument("Sizes of matrixes must match.");
-		Matrix res_m(_rows, _cols, 0);
+		Matrix res_m(_rows, _cols);
 		for (int i = 0; i < _rows; ++i) {
 			for (int j = 0; j < _cols; ++j) {
 				res_m(i, j) = _matrix[i][j] - other._matrix[i][j];
@@ -108,7 +108,7 @@ public:
 	Matrix operator*(const Matrix& other) {
 		if (_cols != other._rows) throw std::invalid_argument("The number of columns of the first matrix "
 																"must match the number of rows of the second matrix");
-		Matrix res_m(_rows, other._cols, 0);
+		Matrix res_m(_rows, other._cols);
 		for (int i = 0; i < _rows; ++i) {
 			for (int j = 0; j < other._cols; ++j) {
 				for (int k = 0; k < _cols; ++k) {
@@ -118,6 +118,16 @@ public:
 		}
 		return res_m;
 
+	}
+
+	Matrix operator*(const T val) {
+		Matrix res_m(_rows, _cols);
+		for (int i = 0; i < _rows; ++i) {
+			for (int j = 0; j < _cols; ++j) {
+				res_m(i, j) = _matrix[i][j] * val;
+			}
+		}
+		return res_m;
 	}
 
 };
@@ -132,4 +142,9 @@ ostream& operator<<(ostream& os, const Matrix<T>& m) {
 		os << '\n';
 	}
 	return os;
+}
+
+template <typename T>
+Matrix<T> operator*(const T val, Matrix <T>& m) {
+	return m * val;
 }
