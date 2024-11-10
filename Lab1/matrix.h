@@ -14,13 +14,13 @@ private:
 	T** _matrix;
 
 public:
-	Matrix(size_t rows, size_t cols, T val = 0) {
-		if (r <= 0 || c <= 0) throw invalid_argument("Size of matrix must be greater than zero.");
+	Matrix(int rows, int cols, T val = 0) {
+		if (rows <= 0 || cols <= 0) throw invalid_argument("Size of matrix must be greater than zero.");
 
 		_rows = rows;
 		_cols = cols;
 
-		_matrix = new T[_rows];
+		_matrix = new T*[_rows];
 		for (int i = 0; i < _rows; ++i) {
 			_matrix[i] = new T[_cols];
 			for (int j = 0; j < _cols; ++j) {
@@ -36,7 +36,7 @@ public:
 		_cols = cols;
 
 		srand(time(0));
-		_matrix = new T[_rows];
+		_matrix = new T * [_rows];
 		for (int i = 0; i < rows; ++i) {
 			_matrix[i] = new T[_cols];
 			for (int j = 0; j < cols; ++j) {
@@ -65,9 +65,22 @@ public:
 		delete[] _matrix;
 	}
 
-	T& operator()(size_t r, size_t c) {
-		if (r < 0 || r >= _rows || c < 0 || c >= _cols) throw out_of_range("Invalid index!");
-		return &_matrix[r][c];
+	size_t rows() const {
+		return _rows;
+	}
+
+	size_t cols() const {
+		return _cols;
+	}
+
+	T& operator()(size_t row, size_t col) {
+		if (row < 0 || row >= _rows || col < 0 || col >= _cols) throw out_of_range("Invalid index!");
+		return _matrix[row][col];
+	}
+
+	T operator()(size_t row, size_t col) const {
+		if (row < 0 || row >= _rows || col < 0 || col >= _cols) throw out_of_range("Invalid index!");
+		return _matrix[row][col];
 	}
 
 	Matrix operator+(const Matrix& other) {
@@ -85,3 +98,15 @@ public:
 
 
 };
+
+
+template <typename T>
+ostream& operator<<(ostream& os, const Matrix<T>& m) {
+	for (int i = 0; i < m.rows(); ++i) {
+		for (int j = 0; j < m.cols(); ++j) {
+			os << m(i, j) << '\t';
+		}
+		os << '\n';
+	}
+	return os;
+}
