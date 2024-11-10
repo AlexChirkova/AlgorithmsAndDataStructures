@@ -7,6 +7,8 @@
 
 using namespace std;
 
+static constexpr double EPSILON = 1e-5;
+
 template<typename T>
 class Matrix {
 private:
@@ -14,7 +16,7 @@ private:
 	T** _matrix;
 
 public:
-	Matrix(int rows, int cols, T val = 0) {
+	Matrix(size_t rows, size_t cols, T val = 0) {
 		if (rows <= 0 || cols <= 0) throw invalid_argument("Size of matrix must be greater than zero.");
 
 		_rows = rows;
@@ -29,18 +31,24 @@ public:
 		}
 	}
 
-	Matrix(size_t rows, size_t cols, T max_val, T min_val){
+	Matrix(size_t rows, size_t cols, T min_val, T max_val){
 		if (rows <= 0 || cols <= 0) throw invalid_argument("Size of matrix must be greater than zero.");
+
+		if (min_val > max_val) swap(min_val, max_val);
 
 		_rows = rows;
 		_cols = cols;
 
 		srand(time(0));
+		random_device rd;
+		mt19937 generator(rd());
+		uniform_real_distribution<> distribution(min_val, max_val);
+		
 		_matrix = new T * [_rows];
 		for (int i = 0; i < rows; ++i) {
 			_matrix[i] = new T[_cols];
 			for (int j = 0; j < cols; ++j) {
-				_matrix[i][j] = ((T)rand() / RAND_MAX) * (max_val - min_val) + min_val;
+				_matrix[i][j] = distribution(generator);
 			}
 		}
 	}
@@ -128,6 +136,26 @@ public:
 			}
 		}
 		return res_m;
+	}
+
+	Matrix operator/(const T val) {
+		Matrix res_m(_rows, _cols);
+		for (int i = 0; i < _rows; ++i) {
+			for (int j = 0; j < _cols; ++j) {
+				res_m(i, j) = _matrix[i][j] / val;
+			}
+		}
+		return res_m;
+	}
+
+	T trace() {
+		if (_rows != _cols) throw std::invalid_argument("The trace can only be calculated for a square matrix");
+		
+		T trace = 0;
+		for (int i = 0; i < _rows; ++i) {
+			trace += _matrix[i][i];
+		}
+		return trace;
 	}
 
 };
