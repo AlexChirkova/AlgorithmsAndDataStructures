@@ -85,17 +85,40 @@ public:
 
 	Matrix operator+(const Matrix& other) {
 		if (_rows != other._rows || _cols != other._cols) throw invalid_argument("Sizes of matrixes must match.");
-		Matrix sum_m(_rows, _cols, 0);
+		Matrix res_m(_rows, _cols, 0);
 		for (int i = 0; i < _rows; ++i) {
 			for (int j = 0; j < _cols; ++j) {
-				sum_m[i][j] = _matrix[i][j] + other._matrix[i][j];
+				res_m(i,j) = _matrix[i][j] + other._matrix[i][j];
 			}
 		}
-		return sum_m;
+		return res_m;
 	}
 
+	Matrix operator-(const Matrix& other) {
+		if (_rows != other._rows || _cols != other._cols) throw invalid_argument("Sizes of matrixes must match.");
+		Matrix res_m(_rows, _cols, 0);
+		for (int i = 0; i < _rows; ++i) {
+			for (int j = 0; j < _cols; ++j) {
+				res_m(i, j) = _matrix[i][j] - other._matrix[i][j];
+			}
+		}
+		return res_m;
+	}
 
+	Matrix operator*(const Matrix& other) {
+		if (_cols != other._rows) throw std::invalid_argument("The number of columns of the first matrix "
+																"must match the number of rows of the second matrix");
+		Matrix res_m(_rows, other._cols, 0);
+		for (int i = 0; i < _rows; ++i) {
+			for (int j = 0; j < other._cols; ++j) {
+				for (int k = 0; k < _cols; ++k) {
+					res_m(i, j) += _matrix[i][k] * other._matrix[k][j];
+				}	
+			}
+		}
+		return res_m;
 
+	}
 
 };
 
