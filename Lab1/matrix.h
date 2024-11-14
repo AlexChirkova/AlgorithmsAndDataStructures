@@ -4,6 +4,8 @@
 #include<cstdlib>
 #include <ctime>
 #include <stdexcept>
+#include <iomanip>
+#include <complex>
 
 using namespace std;
 
@@ -34,21 +36,21 @@ public:
 	Matrix(size_t rows, size_t cols, T min_val, T max_val){
 		if (rows <= 0 || cols <= 0) throw invalid_argument("Size of matrix must be greater than zero.");
 
-		if (min_val > max_val) swap(min_val, max_val);
+		if ((min_val) > (max_val)) swap(min_val, max_val);
 
 		_rows = rows;
 		_cols = cols;
 
-		srand(time(0));
+		srand(static_cast<unsigned int>(time(0)));
 		random_device rd;
 		mt19937 generator(rd());
-		uniform_real_distribution<> distribution(min_val, max_val);
+		uniform_real_distribution<T> distribution(min_val, max_val);
 		
 		_matrix = new T * [_rows];
 		for (int i = 0; i < rows; ++i) {
 			_matrix[i] = new T[_cols];
 			for (int j = 0; j < cols; ++j) {
-				_matrix[i][j] = distribution(generator);
+				_matrix[i][j] = static_cast<T>(distribution(generator));
 			}
 		}
 	}
@@ -148,6 +150,21 @@ public:
 		return res_m;
 	}
 
+	bool operator==(const Matrix& other) const{
+		if (_rows != other._rows || _cols != other._cols) return false;
+
+		size_t size = _rows * _cols;
+		for (size_t i = 0; i < size; ++i){
+			if (std::abs(_matrix[i] - other._matrix[i]) > EPSILON) return false;
+		}
+		return true;
+	}
+
+	bool operator!=(const Matrix& other) const
+	{
+		return !(*this == other);
+	}
+
 	T trace() {
 		if (_rows != _cols) throw std::invalid_argument("The trace can only be calculated for a square matrix");
 		
@@ -158,6 +175,64 @@ public:
 		return trace;
 	}
 
+	Matrix& downTr() {
+		/*if (_rows != _cols) throw std::invalid_argument("Matrix mast be square to downTr it.");
+
+		for (int k = int(_rows)-1; k >=0; --k) {
+			T point = _matrix[k][k];
+			if (point == 0) throw runtime_error("The zero element on the main diagonal.");
+
+			for (int i = k - 1; i >= 0; --i) {
+				T ratio = _matrix[i][k] / _matrix[k][k];
+				for (int j = k; j >= 0; --j) {
+					_matrix[i][j] -= ratio * _matrix[k][j];
+				}
+			}
+		}
+		return *this;*/
+		
+		if (_rows != _cols) throw std::invalid_argument("Only square matrices are reduced to a triangular form!");
+
+		size_t n = _rows;
+		for (size_t i = n; i > 0; --i)
+		{
+			size_t row = i - 1;
+
+			if (std::abs(_matrix[row][row]) < EPSILON)
+			{
+				bool swapped = false;
+				for (size_t j = row - 1; j < n; --j)
+				{
+					if (std::abs(_matrix[j][row]) > EPSILON)
+					{
+						for (size_t k = 0; k < n; ++k)
+						{
+							std::swap(_matrix[row][k], _matrix[j][k]);
+						}
+						swapped = true;
+						break;
+					}
+				}
+				if (!swapped)
+				{
+					throw std::runtime_error("Matrix is singular and cannot be reduced!");
+				}
+			}
+
+			for (size_t j = 0; j < row; ++j)
+			{
+				T multiplier = _matrix[j][row] / _matrix[row][row];
+				for (size_t k = 0; k < n; ++k)
+				{
+					_matrix[j][k] -= multiplier * _matrix[row][k];
+				}
+
+			}
+			
+		}
+		return *this;
+	}
+
 };
 
 
@@ -165,7 +240,7 @@ template <typename T>
 ostream& operator<<(ostream& os, const Matrix<T>& m) {
 	for (int i = 0; i < m.rows(); ++i) {
 		for (int j = 0; j < m.cols(); ++j) {
-			os << m(i, j) << '\t';
+			os << m(i, j) << setw(10);
 		}
 		os << '\n';
 	}
